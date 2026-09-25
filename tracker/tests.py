@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from .models import Transaction, Budget
+from django.test import override_settings
 
 
 class UserIsolationTest(TestCase):
@@ -80,8 +81,7 @@ class BudgetIsolationTest(TestCase):
             self.user1
         )
 from django.urls import reverse
-
-
+@override_settings(SECURE_SSL_REDIRECT=False)
 class AuthenticationTest(TestCase):
 
     def test_user_registration(self):
