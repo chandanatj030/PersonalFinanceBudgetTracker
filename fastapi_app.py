@@ -1,5 +1,8 @@
 import os
 import django
+import jwt
+
+from datetime import datetime, timedelta, timezone
 
 os.environ.setdefault(
     'DJANGO_SETTINGS_MODULE',
@@ -9,7 +12,6 @@ os.environ.setdefault(
 django.setup()
 
 from fastapi import FastAPI, Request, HTTPException
-from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.auth.models import User
 
 
@@ -18,35 +20,82 @@ app = FastAPI(
 )
 
 
+def create_access_token(user):
+
+    secret_key = os.getenv('DJANGO_SECRET_KEY')
+
+    if not secret_key:
+        raise HTTPException(
+            status_code=500,
+            detail="Server configuration error."
+        )
+
+    payload = {
+        'user_id': user.id,
+        'exp': datetime.now(timezone.utc) + timedelta(hours=1)
+    }
+
+    return jwt.encode(
+        payload,
+        secret_key,
+        algorithm='HS256'
+    )
+
+
 def get_logged_in_user(request: Request):
 
-    session_id = request.cookies.get('sessionid')
+    authorization = request.headers.get('Authorization')
 
-    if not session_id:
+    if not authorization:
         raise HTTPException(
             status_code=401,
-            detail="Login required."
+            detail="Authorization token required."
         )
 
-    session = SessionStore(session_key=session_id)
-
-    if not session.exists(session_id):
+    if not authorization.startswith('Bearer '):
         raise HTTPException(
             status_code=401,
-            detail="Invalid session."
+            detail="Invalid authorization format."
         )
 
-    user_id = session.get('_auth_user_id')
+    token = authorization.split(' ', 1)[1]
 
-    if not user_id:
-        raise HTTPException(
-            status_code=401,
-            detail="Login required."
-        )
+    secret_key = os.getenv('DJANGO_SECRET_KEY')
 
     try:
+
+        payload = jwt.decode(
+            token,
+            secret_key,
+            algorithms=['HS256']
+        )
+
+        user_id = payload.get('user_id')
+
+        if not user_id:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token."
+            )
+
         return User.objects.get(id=user_id)
+
+    except jwt.ExpiredSignatureError:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Token expired."
+        )
+
+    except jwt.InvalidTokenError:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token."
+        )
+
     except User.DoesNotExist:
+
         raise HTTPException(
             status_code=401,
             detail="User not found."
