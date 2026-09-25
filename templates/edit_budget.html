@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Budget - Finance Tracker</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f8;
+            color: #222;
+        }
+
+        .navbar {
+            background-color: #1f2937;
+            color: white;
+            padding: 18px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            font-size: 22px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 15px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 40px auto;
+        }
+
+        .budget-box {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .budget-box h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        form p {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px;
+            margin-top: 7px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .save-button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background-color: #2563eb;
+            color: white;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .save-button:hover {
+            opacity: 0.85;
+        }
+
+        .back-button {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #2563eb;
+        }
+
+        .back-button:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .navbar a {
+                margin: 0 8px;
+            }
+
+            .container {
+                width: 95%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <h1>Finance Tracker</h1>
+
+        <div>
+
+            <a href="{% url 'home' %}">
+                Home
+            </a>
+
+            <a href="{% url 'transactions' %}">
+                Transactions
+            </a>
+
+            <a href="{% url 'set_budget' %}">
+                Budget
+            </a>
+
+            <a href="{% url 'logout' %}">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <main class="container">
+
+        <section class="budget-box">
+
+            <h2>
+                Edit Budget
+            </h2>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+                <button
+                    type="submit"
+                    class="save-button">
+
+                    Update Budget
+
+                </button>
+
+            </form>
+
+
+            <a
+                href="{% url 'set_budget' %}"
+                class="back-button">
+
+                ← Back to Budget
+
+            </a>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

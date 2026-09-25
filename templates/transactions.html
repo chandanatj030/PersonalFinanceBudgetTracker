@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Transactions - Finance Tracker</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f8;
+            color: #222;
+        }
+
+        /* Navigation */
+
+        .navbar {
+            background-color: #1f2937;
+            color: white;
+            padding: 18px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            font-size: 22px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 15px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        /* Main Container */
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        /* Transactions Box */
+
+        .transactions {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow-x: auto;
+        }
+
+        .transactions h2 {
+            margin-bottom: 20px;
+        }
+        /* Filters */
+
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: end;
+    margin-bottom: 25px;
+    padding: 18px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-group label {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    background-color: white;
+    font-size: 14px;
+}
+
+.filter-button,
+.clear-button {
+    padding: 10px 16px;
+    border-radius: 5px;
+    border: none;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.filter-button {
+    background-color: #2563eb;
+    color: white;
+}
+
+.clear-button {
+    background-color: #6b7280;
+    color: white;
+}
+
+.filter-button:hover,
+.clear-button:hover {
+    opacity: 0.85;
+}
+
+        /* Table */
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f3f4f6;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        /* Income / Expense */
+
+        .income-text {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .expense-text {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        /* Action Buttons */
+
+        .action-buttons {
+            white-space: nowrap;
+        }
+
+        .edit-button,
+        .delete-button {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .edit-button {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .delete-button {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .edit-button:hover,
+        .delete-button:hover {
+            opacity: 0.85;
+        }
+
+        /* Empty Message */
+
+        .empty-message {
+            text-align: center;
+            color: #666;
+            padding: 25px;
+        }
+
+        /* Back Button */
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 20px;
+            background-color: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .back-button:hover {
+            opacity: 0.85;
+        }
+
+        /* Responsive Design */
+
+        @media (max-width: 768px) {
+
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .navbar a {
+                margin: 0 8px;
+            }
+
+            .container {
+                width: 95%;
+            }
+
+            .transactions {
+                padding: 15px;
+            }
+
+            table {
+                font-size: 13px;
+            }
+
+            th,
+            td {
+                padding: 10px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+    {% if messages %}
+        {% for message in messages %}
+            <div style="
+                padding: 12px;
+                margin: 15px auto;
+                max-width: 1200px;
+                background-color: #d1fae5;
+                color: #065f46;
+                border-radius: 6px;
+                text-align: center;
+                font-weight: 500;
+        ">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+
+    <!-- Navigation -->
+
+    <nav class="navbar">
+
+        <h1>Finance Tracker</h1>
+
+        <div>
+
+            <a href="{% url 'home' %}">
+                Home
+            </a>
+
+            <a href="{% url 'transactions' %}">
+                Transactions
+            </a>
+
+            <a href="{% url 'set_budget' %}">
+                Budget
+            </a>
+
+            <a href="{% url 'logout' %}">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- Main Content -->
+
+    <main class="container">
+
+        <section class="transactions">
+
+            <h2>
+                All Transactions
+            </h2>
+            <!-- Filters -->
+
+<form method="GET" class="filter-form">
+
+    <div class="filter-group">
+
+        <label for="type">
+            Type
+        </label>
+
+        <select name="type" id="type">
+
+            <option value="">
+                All
+            </option>
+
+            <option value="income"
+                {% if selected_type == 'income' %}selected{% endif %}>
+                Income
+            </option>
+
+            <option value="expense"
+                {% if selected_type == 'expense' %}selected{% endif %}>
+                Expense
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <div class="filter-group">
+
+        <label for="category">
+            Category
+        </label>
+
+        <select name="category" id="category">
+
+            <option value="">
+                All
+            </option>
+
+            {% for category in categories %}
+
+            <option value="{{ category.id }}"
+                {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+
+                {{ category.name }}
+
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+
+    <div class="filter-group">
+
+        <label for="date">
+            Date
+        </label>
+
+        <input
+            type="date"
+            name="date"
+            id="date"
+            value="{{ selected_date|default:'' }}"
+        >
+
+    </div>
+
+
+    <button type="submit" class="filter-button">
+        Apply Filters
+    </button>
+
+
+    <a href="{% url 'transactions' %}" class="clear-button">
+        Clear Filters
+    </a>
+
+</form>
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Date</th>
+
+                        <th>Description</th>
+
+                        <th>Category</th>
+
+                        <th>Type</th>
+
+                        <th>Amount</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for transaction in transactions %}
+
+                    <tr>
+
+                        <td>
+                            {{ transaction.date|date:"d-m-Y" }}
+                        </td>
+
+
+                        <td>
+                            {{ transaction.description }}
+                        </td>
+
+
+                        <td>
+
+                            {% if transaction.category %}
+
+                                {{ transaction.category.name }}
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td
+                            class="{% if transaction.transaction_type == 'income' %}income-text{% else %}expense-text{% endif %}">
+
+                            {{ transaction.transaction_type|title }}
+
+                        </td>
+
+
+                        <td
+                            class="{% if transaction.transaction_type == 'income' %}income-text{% else %}expense-text{% endif %}">
+
+                            ₹{{ transaction.amount }}
+
+                        </td>
+
+
+                        <td class="action-buttons">
+
+                            <a
+                                href="{% url 'edit_transaction' transaction.id %}"
+                                class="edit-button">
+
+                                Edit
+
+                            </a>
+
+
+                            <form method="POST"
+      action="{% url 'delete_transaction' transaction.id %}"
+      style="display: inline;">
+
+    {% csrf_token %}
+
+    <button type="submit"
+            class="delete-button"
+            onclick="return confirm('Are you sure you want to delete this transaction?');">
+
+        Delete
+
+    </button>
+
+</form>
+                        </td>
+
+                    </tr>
+
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            class="empty-message">
+
+                            No transactions found.
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+
+            <a
+                href="{% url 'home' %}"
+                class="back-button">
+
+                ← Back to Dashboard
+
+            </a>
+
+        </section>
+
+    </main>
+
+
+</body>
+
+</html>
