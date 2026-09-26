@@ -11,13 +11,44 @@ os.environ.setdefault(
 
 django.setup()
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from django.contrib.auth.models import User
-
 
 app = FastAPI(
     title="Personal Finance Budget Tracker API"
 )
+security = HTTPBearer()
+from pydantic import BaseModel
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+@app.post("/api/login/")
+def api_login(data: LoginRequest):
+
+    from django.contrib.auth import authenticate
+
+    user = authenticate(
+        username=data.username,
+        password=data.password
+    )
+
+    if user is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username or password."
+        )
+
+    token = create_access_token(user)
+
+    return {
+        "access_token": token,
+        "token_type": "bearer"
+    }
 
 
 def create_access_token(user):
@@ -41,8 +72,10 @@ def create_access_token(user):
         algorithm='HS256'
     )
 
-
-def get_logged_in_user(request: Request):
+def get_logged_in_user(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
 
     authorization = request.headers.get('Authorization')
 
@@ -109,10 +142,11 @@ def home():
         "message": "Personal Finance Budget Tracker API is running!"
     }
 
-
 @app.get("/api/transactions/")
-def get_transactions(request: Request):
-
+def get_transactions(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
     from tracker.models import Transaction
 
     user = get_logged_in_user(request)
@@ -134,7 +168,10 @@ def get_transactions(request: Request):
 
 
 @app.get("/api/budget/")
-def get_budget(request: Request):
+def get_budget(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
 
     from tracker.models import Budget
 
@@ -155,7 +192,10 @@ def get_budget(request: Request):
 
 
 @app.get("/api/summary/")
-def get_summary(request: Request):
+def get_summary(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
 
     from tracker.models import Transaction, Budget
     from django.db.models import Sum
