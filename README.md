@@ -80,3 +80,20 @@ PersonalFinanceBudgetTracker/
 ├── manage.py
 ├── .gitignore
 └── README.md
+## How to Run Locally
+
+1. Clone the repository.
+2. Create and activate a Python virtual environment.
+3. Install the required dependencies.
+4. Configure the required environment variables.
+5. Apply Django migrations.
+6. Start the Django development server.
+
+Example:
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
