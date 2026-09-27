@@ -502,13 +502,17 @@ getAccessToken()
 const filteredData = data.filter(transaction => {
     const type = params.get("type");
     const category = params.get("category");
+    const categorySelect = document.getElementById("category");
+    const selectedCategory = categorySelect
+    ? categorySelect.options[categorySelect.selectedIndex].text
+    : "";
     const date = params.get("date");
 
     if (type && transaction.type !== type) {
         return false;
     }
 
-    if (category && transaction.category !== category) {
+    if (category && selectedCategory !== "All" && transaction.category !== selectedCategory) {
         return false;
     }
 
