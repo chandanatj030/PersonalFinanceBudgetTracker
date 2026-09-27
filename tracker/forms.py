@@ -33,20 +33,20 @@ class TransactionForm(forms.ModelForm):
 
         widgets = {
             'date': forms.DateInput(
+                format='%Y-%m-%d',
                 attrs={'type': 'date'}
             ),
         }
-
-
 class BudgetForm(forms.ModelForm):
 
 
     month = forms.DateField(
-        input_formats=['%Y-%m'],
-        widget=forms.DateInput(
-            attrs={'type': 'month'}
-        )
+    input_formats=['%Y-%m'],
+    widget=forms.DateInput(
+        format='%Y-%m',
+        attrs={'type': 'month'}
     )
+)
 
     amount = forms.DecimalField(
         max_digits=10,

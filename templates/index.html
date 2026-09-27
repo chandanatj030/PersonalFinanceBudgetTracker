@@ -372,8 +372,8 @@
 
                 <h3>Total Income</h3>
 
-                <p class="income">
-                    ₹{{ total_income }}
+                <p class="income" id="totalIncome">
+                         ₹{{ total_income }}
                 </p>
 
             </div>
@@ -385,10 +385,9 @@
 
                 <h3>Total Expenses</h3>
 
-                <p class="expense">
+                <p class="expense" id="totalExpenses">
                     ₹{{ total_expenses }}
                 </p>
-
             </div>
 
 
@@ -396,13 +395,13 @@
 
             <div class="card">
 
-                <h3>Remaining Balance</h3>
+    <h3>Remaining Balance</h3>
 
-                <p class="balance">
+              <p class="balance" id="remainingBalance">
                     ₹{{ balance }}
-                </p>
+              </p>
 
-            </div>
+                </div>
 
 
         </section>
@@ -421,9 +420,8 @@
 
                 <p>
                     Budget:
-                    <strong>₹{{ budget_amount }}</strong>
+                        <strong id="totalBudget">₹{{ budget_amount }}</strong>
                 </p>
-
                 <p>
                     Spent:
                     <strong>₹{{ monthly_expenses }}</strong>
@@ -610,6 +608,64 @@
 
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    const FASTAPI_URL = "http://127.0.0.1:8002";
+    let accessToken = sessionStorage.getItem("access_token");
+
+
+function getAccessToken() {
+    if (accessToken) {
+        return Promise.resolve(accessToken);
+    }
+
+    return fetch("/api-token/")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to get access token");
+            }
+            return response.json();
+        })
+        .then(data => {
+            accessToken = data.access_token;
+            sessionStorage.setItem("access_token", accessToken);
+            return accessToken;
+        });
+}
+    getAccessToken()
+    .then(token => {
+        return fetch(FASTAPI_URL + "/api/summary/", {
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("FastAPI summary request failed");
+        }
+        return response.json();
+    })
+
+.then(data => {
+    console.log("FastAPI Summary:", data);
+
+    document.getElementById("totalIncome").textContent =
+        "₹" + data.total_income.toFixed(2);
+
+    document.getElementById("totalExpenses").textContent =
+        "₹" + data.total_expenses.toFixed(2);
+
+    document.getElementById("remainingBalance").textContent =
+        "₹" + data.balance.toFixed(2);
+
+    document.getElementById("totalBudget").textContent =
+        "₹" + data.total_budget.toFixed(2);
+})
+    .catch(error => {
+        console.error("FastAPI connection error:", error);
+    });
+</script>
 
 <script>
     let totalIncome = 0;

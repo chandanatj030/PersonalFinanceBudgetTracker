@@ -12,11 +12,23 @@ os.environ.setdefault(
 django.setup()
 
 from fastapi import FastAPI, Request, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from django.contrib.auth.models import User
 
 app = FastAPI(
     title="Personal Finance Budget Tracker API"
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "https://personal-finance-tracker-1gnf.onrender.com"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 security = HTTPBearer()
 from pydantic import BaseModel
@@ -161,6 +173,7 @@ def get_transactions(
             "type": transaction.transaction_type,
             "amount": float(transaction.amount),
             "description": transaction.description,
+            "category": transaction.category.name if transaction.category else "-",
             "date": str(transaction.date)
         }
         for transaction in transactions
@@ -199,6 +212,7 @@ def get_summary(
 
     from tracker.models import Transaction, Budget
     from django.db.models import Sum
+    from django.utils import timezone
 
     user = get_logged_in_user(request)
 
@@ -211,7 +225,9 @@ def get_summary(
 
     total_expenses = Transaction.objects.filter(
         user=user,
-        transaction_type='expense'
+        transaction_type='expense',
+        date__year=timezone.now().year,
+        date__month=timezone.now().month
     ).aggregate(
         total=Sum('amount')
     )['total'] or 0

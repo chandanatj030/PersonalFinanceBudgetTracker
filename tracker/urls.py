@@ -9,6 +9,8 @@ urlpatterns = [
     path('login/', views.login_user, name='login'),
 
     path('logout/', views.logout_user, name='logout'),
+    
+    path('api-token/', views.get_api_token, name='api_token'),
 
     path('add-transaction/', views.add_transaction, name='add_transaction'),
 

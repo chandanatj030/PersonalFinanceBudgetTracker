@@ -2,10 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
+import os
+import jwt
+from datetime import datetime, timedelta, timezone
 from .forms import TransactionForm, BudgetForm, RegisterForm
 from .models import Transaction, Budget,Category
 from django.utils import timezone
 from django.contrib import messages
+from django.http import JsonResponse
 
 
 def register(request):
@@ -395,3 +399,22 @@ def delete_transaction(request, id):
         )
 
     return redirect('transactions')
+@login_required
+def get_api_token(request):
+    secret_key = os.getenv('DJANGO_SECRET_KEY')
+
+    payload = {
+        'user_id': request.user.id,
+        'exp': datetime.now().astimezone() + timedelta(hours=1)
+    }
+
+    token = jwt.encode(
+        payload,
+        secret_key,
+        algorithm='HS256'
+    )
+
+    return JsonResponse({
+        'access_token': token,
+        'token_type': 'bearer'
+    })
