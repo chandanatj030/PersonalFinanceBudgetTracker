@@ -497,7 +497,29 @@ getAccessToken()
 
     tableBody.innerHTML = "";
 
-    data.forEach(transaction => {
+    const params = new URLSearchParams(window.location.search);
+
+const filteredData = data.filter(transaction => {
+    const type = params.get("type");
+    const category = params.get("category");
+    const date = params.get("date");
+
+    if (type && transaction.type !== type) {
+        return false;
+    }
+
+    if (category && transaction.category !== category) {
+        return false;
+    }
+
+    if (date && transaction.date !== date) {
+        return false;
+    }
+
+    return true;
+});
+
+filteredData.forEach(transaction => {
 
         const row = document.createElement("tr");
 
